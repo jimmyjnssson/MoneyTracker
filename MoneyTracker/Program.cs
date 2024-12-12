@@ -31,9 +31,10 @@ namespace MoneyTracker
                 Console.WriteLine("8. Delete Data File");
                 Console.WriteLine("9. Save & Exit");
                 Console.Write("Choose an option (1-9): ");
-                string choice = Console.ReadLine();
+                
+                string menuOption = Console.ReadLine();
 
-                switch (choice)
+                switch (menuOption)
                 {
                     case "1":
                         AddTransaction(TransactionType.Income);
