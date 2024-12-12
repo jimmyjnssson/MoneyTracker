@@ -16,7 +16,7 @@ namespace MoneyTracker
     {
         public TransactionType Type { get; set; }
         public string Description { get; set; }
-        public double Amount { get; set; }  
+        public double Amount { get; set; }
         public int Month { get; set; }
 
         public Transaction(TransactionType type, string description, double amount, int month)
@@ -32,17 +32,17 @@ namespace MoneyTracker
             return $"{Type}: {Description}, Amount: {Amount.ToString("C", new System.Globalization.CultureInfo("sv-SE"))}, Month: {Month}";
         }
 
-        public string ToFileFormat()
+        public string WriteToFile()
         {
             return $"{Type},{Description},{Amount},{Month}";
         }
 
-        public static Transaction FromFileFormat(string line)
+        public static Transaction ReadFromFile(string fileLine)
         {
-            var parts = line.Split(',');
-            if (parts.Length == 4 && Enum.TryParse(parts[0], out TransactionType type) && double.TryParse(parts[2], out double amount) && int.TryParse(parts[3], out int month))
+            var partsFromFile = fileLine.Split(',');
+            if (partsFromFile.Length == 4 && Enum.TryParse(partsFromFile[0], out TransactionType type) && double.TryParse(partsFromFile[2], out double amount) && int.TryParse(partsFromFile[3], out int month))
             {
-                return new Transaction(type, parts[1], amount, month);
+                return new Transaction(type, partsFromFile[1], amount, month);
             }
             return null;
         }

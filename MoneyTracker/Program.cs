@@ -15,12 +15,12 @@ namespace MoneyTracker
 
             while (true)
             {
-                
+
 
                 //Menu
                 Console.Clear();
                 DisplayAccountBalance();
-                Console.WriteLine("Money Tracker");
+                
                 Console.WriteLine("1. Add Income");
                 Console.WriteLine("2. Add Expense");
                 Console.WriteLine("3. View Incomes");
@@ -82,19 +82,21 @@ namespace MoneyTracker
                     balance -= transaction.Amount;
                 }
             }
-
-            Console.WriteLine($"Current Total Account Balance: {balance.ToString("C", sweCurrency)}\n");
+            Console.Write("Current Total Account Balance: ");
+            Console.ForegroundColor = ConsoleColor.Green; 
+            Console.WriteLine($"{balance.ToString("C", sweCurrency)}\n");
+            Console.ResetColor(); 
         }
 
         private static void AddTransaction(TransactionType type)
         {
-            Console.Write("Enter description: ");
+            Console.Write("Enter description to Expense/Income: ");
             string description = Console.ReadLine();
-            Console.Write("Enter amount: ");
+            Console.Write("Enter an amount: ");
             double amount;
             if (double.TryParse(Console.ReadLine(), out amount))
             {
-                Console.Write("Enter month (1-12): ");
+                Console.Write("Enter month - between 1-12: ");
                 int month;
                 while (!int.TryParse(Console.ReadLine(), out month) || month < 1 || month > 12)
                 {
@@ -108,7 +110,7 @@ namespace MoneyTracker
             }
             else
             {
-                Console.WriteLine("Invalid amount entered. Please try again.");
+                Console.WriteLine("Invalid amount entered. Try again");
             }
             Console.WriteLine("Press any key to continue...");
             Console.ReadKey();
@@ -158,8 +160,8 @@ namespace MoneyTracker
         private static void PrintTableHeader()
         {
             Console.WriteLine(
-                $"{"Type".PadRight(10)}{"Description".PadRight(30)}{"Amount".PadLeft(15)}{"Month".PadLeft(10)}"); 
-            Console.WriteLine(new string('-', 70)); // Create a line separator
+                $"{"Type".PadRight(10)}{"Description".PadRight(30)}{"Amount".PadLeft(15)}{"Month".PadLeft(10)}");
+            Console.WriteLine(new string('-', 70)); // Create a line separator for header
         }
 
         //Method to print the transaction to look like a DB table and add color on the Enum type
@@ -181,14 +183,14 @@ namespace MoneyTracker
                 $"{transaction.Amount.ToString("C", sweCurrency).PadLeft(15)}" +
                 $"{transaction.Month.ToString().PadLeft(10)}");
 
-            
+
             Console.ResetColor();
         }
 
         private static void EditTransaction()
         {
             Console.WriteLine("\nSelect a transaction to edit by transaction index:");
-            
+
             //Loops through the list and displays the transactions to be changed
             for (int i = 0; i < transactions.Count; i++)
             {
@@ -201,22 +203,22 @@ namespace MoneyTracker
             {
                 var transaction = transactions[index - 1];
 
-                Console.Write("Enter new description (press Enter to keep current): ");
+                Console.Write("Enter a new description (press Enter to keep the current value): ");
                 string newDescription = Console.ReadLine();
                 if (!string.IsNullOrEmpty(newDescription))
                 {
                     transaction.Description = newDescription;
                 }
-                    
 
-                Console.Write("Enter new amount (press Enter to keep current): ");
+
+                Console.Write("Enter a new amount (press Enter to keep the current value): ");
                 double newAmount;
                 if (double.TryParse(Console.ReadLine(), out newAmount))
                 {
                     transaction.Amount = newAmount;
                 }
 
-                Console.Write("Enter new month (1-12) (press Enter to keep current): ");
+                Console.Write("Enter a new month - between 1-12 (press Enter to keep the current value): ");
                 int newMonth;
                 if (int.TryParse(Console.ReadLine(), out newMonth) && newMonth >= 1 && newMonth <= 12)
                 {
@@ -256,7 +258,7 @@ namespace MoneyTracker
                 Console.WriteLine("Invalid index. No transaction found to remove.");
             }
 
-            Console.WriteLine("Press any key to continue to continus your session");
+            Console.WriteLine("Press any key to continue to continue your session");
             Console.ReadKey();
         }
 
@@ -268,7 +270,7 @@ namespace MoneyTracker
                 {
                     foreach (var transaction in transactions)
                     {
-                        writer.WriteLine(transaction.ToFileFormat());
+                        writer.WriteLine(transaction.WriteToFile());
                     }
                 }
                 Console.WriteLine("Data saved successfully!");
@@ -279,7 +281,7 @@ namespace MoneyTracker
             }
             catch (UnauthorizedAccessException ex)
             {
-                Console.WriteLine($"Access error: {ex.Message}");
+                Console.WriteLine($"Access to file denied: {ex.Message}");
             }
         }
 
@@ -289,10 +291,10 @@ namespace MoneyTracker
             {
                 if (File.Exists(filePath))
                 {
-                    string[] lines = File.ReadAllLines(filePath);
-                    foreach (var line in lines)
+                    string[] fileLines = File.ReadAllLines(filePath);
+                    foreach (var fileLine in fileLines)
                     {
-                        var transaction = Transaction.FromFileFormat(line);
+                        var transaction = Transaction.ReadFromFile(fileLine);
                         if (transaction != null)
                         {
                             transactions.Add(transaction);
@@ -306,7 +308,7 @@ namespace MoneyTracker
             }
             catch (UnauthorizedAccessException ex)
             {
-                Console.WriteLine($"Access error: {ex.Message}");
+                Console.WriteLine($"Access to file denied: {ex.Message}");
             }
         }
 
@@ -323,7 +325,7 @@ namespace MoneyTracker
                     if (File.Exists(filePath))
                     {
                         File.Delete(filePath);
-                        transactions.Clear(); // Clear the transactions list as the file has been deleted
+                        transactions.Clear(); // Clear the transactions list as the file has been deleted and we don't want the values in our list anymore
                         Console.WriteLine("File deleted successfully!");
                     }
                     else
